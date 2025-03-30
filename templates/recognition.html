@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Emotion Recognition | EmotionAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --primary: #5e35b1;       /* Deep purple */
+            --primary-light: #7e57c2; /* Lighter purple */
+            --secondary: #3949ab;     /* Indigo */
+            --accent: #ff7043;        /* Coral accent */
+            --light: #ede7f6;         /* Very light purple */
+            --white: #ffffff;
+            --dark: #1a237e;          /* Navy blue */
+            --text: #263238;          /* Dark gray */
+            --success: #43a047;       /* Green */
+            --warning: #ff9800;       /* Orange */
+            --danger: #e53935;        /* Red */
+            --gray: #757575;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        /* Header/Navbar - Enhanced with animation */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo i {
+            color: var(--accent);
+        }
+        
+        nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a.active {
+            color: var(--accent);
+        }
+        
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent);
+            animation: underlineGrow 0.3s ease-out;
+        }
+        
+        @keyframes underlineGrow {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        /* Main Content - Enhanced with animations and better layout */
+        .recognition {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .recognition h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .recognition h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .recognition p.subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .content-box {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .content-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        h2 {
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        /* Webcam/Upload Area - Enhanced with tabs */
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+        
+        .tab.active {
+            background-color: var(--primary-light);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            border: 3px solid var(--primary-light);
+            margin: 1rem 0;
+            background: #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        video:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        /* Buttons - Enhanced with icons and loading states */
+        button, .file-label {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 180px;
+        }
+        
+        button:hover:not(:disabled), .file-label:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        #uploadButton {
+            background-color: var(--secondary);
+        }
+        
+        #uploadButton:hover:not(:disabled) {
+            background-color: #4d5bb5;
+        }
+        
+        #captureButton {
+            background-color: var(--accent);
+        }
+        
+        #captureButton:hover:not(:disabled) {
+            background-color: #ff8a65;
+        }
+        
+        .button-loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .button-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 3px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: button-loading-spinner 1s ease infinite;
+        }
+        
+        @keyframes button-loading-spinner {
+            from { transform: rotate(0turn); }
+            to { transform: rotate(1turn); }
+        }
+        
+        /* Result Display - Enhanced with emotion visualization */
+        #result {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background-color: var(--light);
+            border-radius: 8px;
+            color: var(--dark);
+            font-weight: bold;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 5px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+        
+        .result-emotion {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .result-confidence {
+            font-size: 1rem;
+            font-weight: normal;
+            color: var(--gray);
+        }
+        
+        .emotion-visualization {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 1rem;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        
+        .emotion-bar {
+            height: 20px;
+            margin: 0.3rem 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            transition: width 0.5s ease-out;
+        }
+        
+        /* File Upload Styling - Enhanced drag and drop */
+        .file-upload-wrapper {
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed var(--primary-light);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area:hover {
+            background-color: rgba(94, 53, 177, 0.05);
+            border-color: var(--primary);
+        }
+        
+        .file-upload-area.highlight {
+            background-color: rgba(94, 53, 177, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .file-upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area p {
+            margin: 0;
+            color: var(--gray);
+        }
+        
+        .file-upload-area p:first-of-type {
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            background-color: var(--secondary);
+        }
+        
+        #fileName {
+            margin-left: 1rem;
+            color: var(--secondary);
+            font-weight: 500;
+            display: inline-block;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        
+        /* Webcam Controls */
+        .webcam-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Footer - Enhanced with social links */
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .social-links a {
+            color: var(--white);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Responsive Design - Enhanced mobile experience */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                text-align: center;
+                padding: 0 1rem;
+            }
+            
+            nav {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .recognition {
+                padding: 0 1rem;
+            }
+            
+            .recognition h1 {
+                font-size: 2rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                min-width: 150px;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .input-container {
+                gap: 1.5rem;
+            }
+        }
+        
+        /* Emotion specific colors */
+        .happy { color: var(--success); }
+        .sad { color: var(--secondary); }
+        .angry { color: var(--danger); }
+        .surprise { color: var(--warning); }
+        .neutral { color: var(--gray); }
+        .fear { color: var(--primary); }
+        .disgust { color: #7b1fa2; }
+    </style>
+</head>
+<body>
+    <!-- Navigation - Enhanced with scroll effect -->
+    <header id="mainHeader">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                EmotionAI
+            </div>
+            <nav>
+                <a href="{{ url_for('home') }}" 
+                   {% if request.endpoint == 'home' %}class="active"{% endif %}>
+                   Home
+                </a>
+                <a href="{{ url_for('about') }}" 
+                   {% if request.endpoint == 'about' %}class="active"{% endif %}>
+                   About
+                </a>
+                {% if logged_in %}
+                <a href="{{ url_for('recognition') }}" 
+                   {% if request.endpoint == 'recognition' %}class="active"{% endif %}>
+                   Recognition
+                </a>
+                <a href="{{ url_for('logout') }}" 
+                   {% if request.endpoint == 'logout' %}class="active"{% endif %}>
+                   Logout
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" 
+                   {% if request.endpoint == 'login' %}class="active"{% endif %}>
+                   Login
+                </a>
+                <a href="{{ url_for('register') }}" 
+                   {% if request.endpoint == 'register' %}class="active"{% endif %}>
+                   Register
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="recognition">
+        <h1>Facial Emotion Recognition</h1>
+        <p class="subtitle">Our advanced AI analyzes facial expressions in real-time to detect emotions with high accuracy. Try it now with your webcam or upload an image.</p>
+
+        <div class="content-box">
+            <div class="input-container">
+                <!-- Tab Navigation -->
+                <div class="tabs">
+                    <div class="tab active" data-tab="upload">
+                        <i class="fas fa-upload"></i> Upload Image
+                    </div>
+                    <div class="tab" data-tab="webcam">
+                        <i class="fas fa-camera"></i> Webcam
+                    </div>
+                </div>
+                
+                <!-- Upload Tab Content -->
+                <div class="tab-content active" id="upload-tab">
+                    <h2><i class="fas fa-cloud-upload-alt"></i> Upload an Image</h2>
+                    <div class="file-upload-wrapper">
+                        <div class="file-upload-area" id="dropArea">
+                            <i class="fas fa-images"></i>
+                            <p>Drag & Drop your image here</p>
+                            <p>or</p>
+                            <label for="fileInput" class="file-label">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </label>
+                            <input type="file" id="fileInput" accept="image/*">
+                            <div id="fileName"></div>
+                        </div>
+                    </div>
+                    <div id="imagePreview" style="display:none; max-width:100%; margin:1rem auto;">
+                        <img id="previewImage" src="" alt="Preview" style="max-width:100%; max-height:400px; border-radius:8px;">
+                    </div>
+                    <button id="uploadButton">
+                        <i class="fas fa-brain"></i> Analyze Emotion
+                    </button>
+                </div>
+                
+                <!-- Webcam Tab Content -->
+                <div class="tab-content" id="webcam-tab">
+                    <h2><i class="fas fa-video"></i> Use Your Webcam</h2>
+                    <video id="video" autoplay playsinline></video>
+                    <div class="webcam-controls">
+                        <button id="startCamera" class="secondary">
+                            <i class="fas fa-play"></i> Start Camera
+                        </button>
+                        <button id="captureButton">
+                            <i class="fas fa-camera-retro"></i> Capture & Analyze
+                        </button>
+                        <button id="stopCamera" class="danger" style="display:none;">
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="result">
+                <div class="result-emotion">
+                    <i class="far fa-smile"></i>
+                    <span>Emotion will appear here...</span>
+                </div>
+                <div class="result-confidence">Confidence: 0%</div>
+                
+                <div class="emotion-visualization" style="display:none;">
+                    <div class="emotion-bar" data-emotion="happy" style="width:0%">Happy</div>
+                    <div class="emotion-bar" data-emotion="sad" style="width:0%">Sad</div>
+                    <div class="emotion-bar" data-emotion="angry" style="width:0%">Angry</div>
+                    <div class="emotion-bar" data-emotion="surprise" style="width:0%">Surprise</div>
+                    <div class="emotion-bar" data-emotion="neutral" style="width:0%">Neutral</div>
+                    <div class="emotion-bar" data-emotion="fear" style="width:0%">Fear</div>
+                    <div class="emotion-bar" data-emotion="disgust" style="width:0%">Disgust</div>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="canvas" style="display:none;"></canvas>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-smile"></i>
+                EmotionAI
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">&copy; 2025 EmotionAI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Header scroll effect
+            const header = document.getElementById('mainHeader');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+
+            // DOM elements
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const captureButton = document.getElementById('captureButton');
+            const startCamera = document.getElementById('startCamera');
+            const stopCamera = document.getElementById('stopCamera');
+            const resultText = document.querySelector('.result-emotion span');
+            const resultIcon = document.querySelector('.result-emotion i');
+            const resultConfidence = document.querySelector('.result-confidence');
+            const fileInput = document.getElementById('fileInput');
+            const uploadButton = document.getElementById('uploadButton');
+            const fileName = document.getElementById('fileName');
+            const dropArea = document.getElementById('dropArea');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const emotionVisualization = document.querySelector('.emotion-visualization');
+            const emotionBars = document.querySelectorAll('.emotion-bar');
+            
+            // Webcam stream variables
+            let stream = null;
+            
+            // Emotion icons mapping
+            const emotionIcons = {
+                'happy': 'fa-smile-beam',
+                'sad': 'fa-sad-tear',
+                'angry': 'fa-angry',
+                'surprise': 'fa-surprise',
+                'neutral': 'fa-meh',
+                'fear': 'fa-flushed',
+                'disgust': 'fa-grimace'
+            };
+            
+            // Emotion colors mapping
+            const emotionColors = {
+                'happy': 'var(--success)',
+                'sad': 'var(--secondary)',
+                'angry': 'var(--danger)',
+                'surprise': 'var(--warning)',
+                'neutral': 'var(--gray)',
+                'fear': 'var(--primary)',
+                'disgust': '#7b1fa2'
+            };
+            
+            // Start camera button handler
+            startCamera.addEventListener('click', async function() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user' 
+                        }, 
+                        audio: false 
+                    });
+                    video.srcObject = stream;
+                    startCamera.style.display = 'none';
+                    stopCamera.style.display = 'inline-block';
+                    captureButton.disabled = false;
+                } catch (err) {
+                    console.error("Webcam error:", err);
+                    showError(`Webcam error: ${err.message}`);
+                }
+            });
+            
+            // Stop camera button handler
+            stopCamera.addEventListener('click', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                    startCamera.style.display = 'inline-block';
+                    stopCamera.style.display = 'none';
+                    captureButton.disabled = true;
+                }
+            });
+            
+            // File input handler
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    fileName.textContent = file.name;
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+            
+            dropArea.addEventListener('drop', function(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length) {
+                    fileInput.files = files;
+                    fileName.textContent = files[0].name;
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+            
+            // File upload handler
+            uploadButton.addEventListener('click', function() {
+                if (!fileInput.files.length) {
+                    showError('Please select an image first!');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showError('Image size should be less than 5MB');
+                    return;
+                }
+                
+                setLoading(uploadButton, true);
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    showError(error.message);
+                })
+                .finally(() => {
+                    setLoading(uploadButton, false);
+                });
+            });
+            
+            // Webcam capture handler
+            captureButton.addEventListener('click', function() {
+                if (!stream) {
+                    showError('Please start the camera first!');
+                    return;
+                }
+                
+                setLoading(captureButton, true);
+                
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = canvas.toDataURL('image/jpeg');
+                
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData.split(',')[1] })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Prediction error:', error);
+                    showError(error.message);
+                })
+                .finally(() => {
+                    setLoading(captureButton, false);
+                });
+            });
+            
+            // Helper function to display results
+            function displayResults(data) {
+                const primaryEmotion = data.emotions[0].toLowerCase();
+                const confidence = data.confidence ? (data.confidence[0] * 100).toFixed(1) : '100';
+                
+                // Update result display
+                resultText.textContent = data.emotions[0];
+                resultText.className = primaryEmotion;
+                resultConfidence.textContent = `Confidence: ${confidence}%`;
+                
+                // Update icon
+                resultIcon.className = `fas ${emotionIcons[primaryEmotion] || 'fa-smile'}`;
+                
+                // Show visualization if we have confidence data
+                if (data.confidence && data.confidence.length > 1) {
+                    emotionVisualization.style.display = 'block';
+                    
+                    // Update emotion bars
+                    emotionBars.forEach(bar => {
+                        const emotion = bar.getAttribute('data-emotion');
+                        const index = data.emotions.map(e => e.toLowerCase()).indexOf(emotion);
+                        if (index !== -1) {
+                            const width = (data.confidence[index] * 100).toFixed(1);
+                            bar.style.width = `${width}%`;
+                            bar.style.background = `linear-gradient(90deg, ${emotionColors[emotion]}, ${emotionColors[emotion]})`;
+                            bar.textContent = `${emotion.charAt(0).toUpperCase() + emotion.slice(1)}: ${width}%`;
+                        } else {
+                            bar.style.width = '0%';
+                        }
+                    });
+                } else {
+                    emotionVisualization.style.display = 'none';
+                }
+                
+                // Scroll to results
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Helper function to show errors
+            function showError(message) {
+                resultText.textContent = message;
+                resultText.className = 'error';
+                resultIcon.className = 'fas fa-exclamation-triangle';
+                resultConfidence.textContent = '';
+                emotionVisualization.style.display = 'none';
+                
+                // Scroll to results
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Helper function to set loading state
+            function setLoading(button, isLoading) {
+                if (isLoading) {
+                    button.classList.add('button-loading');
+                    button.disabled = true;
+                } else {
+                    button.classList.remove('button-loading');
+                    button.disabled = false;
+                }
+            }
+            
+            // Initialize with webcam disabled
+            captureButton.disabled = true;
+        });
+    </script>
+</body>
+</html>
