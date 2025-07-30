@@ -15,7 +15,7 @@ import re
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
-app.secret_key = 'your_secret_key_here'  # Change this in production
+app.secret_key = 'your_secret_key_here'  # Replace with a secure key in production
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
@@ -31,7 +31,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False)
-    
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -39,38 +39,41 @@ class User(db.Model):
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_FOLDER = os.path.join(APP_ROOT, 'templates')
 STATIC_FOLDER = os.path.join(APP_ROOT, 'static')
-
 app.template_folder = TEMPLATE_FOLDER
 app.static_folder = STATIC_FOLDER
 
-# Password requirements
+# Password strength requirement
 MIN_PASSWORD_LENGTH = 8
 
-# Load the trained model
+# Load model
 try:
     model = tf.keras.models.load_model(os.path.join(APP_ROOT, 'model_file_30epochs.h5'))
 except Exception as e:
     print(f"Error loading model: {e}")
     model = None
 
-# Load OpenCV face detector
+# Load Haar Cascade face detector
 try:
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 except:
-    try:
-        face_cascade = cv2.CascadeClassifier(os.path.join(APP_ROOT, 'haarcascade_frontalface_default.xml'))
-    except Exception as e:
-        print(f"Error loading face cascade: {e}")
-        face_cascade = None
+    face_cascade = None
+    print("Error loading face cascade.")
 
 # Emotion labels
-labels_dict = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Neutral', 5: 'Sad', 6: 'Surprise'}
+labels_dict = {
+    0: 'Angry',
+    1: 'Disgust',
+    2: 'Fear',
+    3: 'Happy',
+    4: 'Neutral',
+    5: 'Sad',
+    6: 'Surprise'
+}
 
+# Emotion detection function
 def detect_emotion(image):
-    """Detects faces in the image and predicts emotion for each detected face."""
     if face_cascade is None or model is None:
         return {"error": "Model or face detector not loaded"}, 500
-    
     try:
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -81,42 +84,41 @@ def detect_emotion(image):
         emotions = []
         for (x, y, w, h) in faces:
             face = gray[y:y+h, x:x+w]
-            resized_face = cv2.resize(face, (48, 48)) / 255.0
-            reshaped_face = np.reshape(resized_face, (1, 48, 48, 1))
-
-            result = model.predict(reshaped_face)
-            label = np.argmax(result, axis=1)[0]
-            emotions.append(labels_dict[label])
+            resized = cv2.resize(face, (48, 48)) / 255.0
+            reshaped = np.reshape(resized, (1, 48, 48, 1))
+            prediction = model.predict(reshaped)
+            emotion_label = labels_dict[np.argmax(prediction)]
+            emotions.append(emotion_label)
 
         return {"emotions": emotions}
     except Exception as e:
         return {"error": str(e)}, 500
 
+# Email format validation
 def is_valid_email(email):
-    """Check if the email is valid."""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
+# Create default admin user
 def create_admin_user():
-    """Create admin user if it doesn't exist"""
     with app.app_context():
         if not User.query.filter_by(username='admin').first():
             admin = User(
                 username='admin',
                 password=generate_password_hash('admin123'),
-                name='Admin User',
+                name='Admin',
                 email='admin@example.com',
                 is_admin=True
             )
             db.session.add(admin)
             db.session.commit()
-            print("Admin user created successfully")
 
-# Context processor to make 'logged_in' available to all templates
+# Global template context
 @app.context_processor
 def inject_user():
     return dict(logged_in='username' in session)
 
+# Routes
 @app.route('/')
 def home():
     if 'username' in session:
@@ -137,68 +139,59 @@ def recognition():
 def login():
     if 'username' in session:
         return redirect(url_for('home'))
-        
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         remember = 'remember' in request.form
-        
+
         user = User.query.filter_by(username=username).first()
-        
         if user and check_password_hash(user.password, password):
             session['username'] = username
-            if remember:
-                session.permanent = True
+            session.permanent = remember
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
-            flash('Invalid username or password', 'danger')
-    
+            flash('Invalid credentials', 'danger')
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'username' in session:
         return redirect(url_for('home'))
-        
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        confirm_password = request.form['confirm_password']
+        confirm = request.form['confirm_password']
         name = request.form['name']
         email = request.form['email']
 
-        # Validation checks
         if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'danger')
+            flash('Username exists', 'danger')
         elif User.query.filter_by(email=email).first():
-            flash('Email already registered', 'danger')
+            flash('Email already used', 'danger')
         elif len(password) < MIN_PASSWORD_LENGTH:
-            flash(f'Password must be at least {MIN_PASSWORD_LENGTH} characters long', 'danger')
-        elif password != confirm_password:
+            flash(f'Password must be at least {MIN_PASSWORD_LENGTH} characters', 'danger')
+        elif password != confirm:
             flash('Passwords do not match', 'danger')
         elif not is_valid_email(email):
-            flash('Please enter a valid email address', 'danger')
+            flash('Invalid email format', 'danger')
         else:
-            new_user = User(
+            user = User(
                 username=username,
                 password=generate_password_hash(password),
                 name=name,
                 email=email
             )
-            db.session.add(new_user)
+            db.session.add(user)
             db.session.commit()
-            
-            flash('Registration successful! Please log in.', 'success')
+            flash('Registered successfully. Please log in.', 'success')
             return redirect(url_for('login'))
-    
     return render_template('register.html', min_password_length=MIN_PASSWORD_LENGTH)
 
 @app.route('/logout')
 def logout():
-    if 'username' in session:
-        session.pop('username', None)
-        flash('You have been logged out', 'info')
+    session.pop('username', None)
+    flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
 
 @app.route('/users')
@@ -214,43 +207,39 @@ def static_files(filename):
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'username' not in session:
-        return jsonify({"error": "Not authenticated"}), 401
-    
+        return jsonify({"error": "Unauthorized"}), 401
     if 'file' not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
-
+        return jsonify({"error": "No file provided"}), 400
     try:
         file = request.files['file']
         image = Image.open(file).convert('RGB')
-        image = np.array(image)
-        return jsonify(detect_emotion(image))
+        np_image = np.array(image)
+        return jsonify(detect_emotion(np_image))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'username' not in session:
-        return jsonify({"error": "Not authenticated"}), 401
-    
+        return jsonify({"error": "Unauthorized"}), 401
     data = request.get_json()
     if not data or 'image' not in data:
         return jsonify({"error": "No image data provided"}), 400
-
     try:
-        if ',' in data['image']:
-            image_data = data['image'].split(",")[1]
-        else:
-            image_data = data['image']
-            
+        image_data = data['image'].split(",")[1] if "," in data['image'] else data['image']
         image_bytes = base64.b64decode(image_data)
         image = Image.open(BytesIO(image_bytes)).convert('RGB')
-        image = np.array(image)
-        return jsonify(detect_emotion(image))
+        image_np = np.array(image)
+        result = detect_emotion(image_np)
+        if isinstance(result, tuple):  # error response
+            return jsonify(result[0]), result[1]
+        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Run the app
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_admin_user()
-    app.run(host='127.0.0.1', port=5500, debug=True)
+    app.run(host='0.0.0.0', port=5500, debug=True)
