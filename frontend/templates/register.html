@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - EmotionAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #5e35b1;
+            --primary-light: #7e57c2;
+            --secondary-color: #3949ab;
+            --accent-color: #ff7043;
+            --light-color: rgba(248, 249, 250, 0.9);
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --white: #ffffff;
+            --black: #000000;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Overlay */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
+
+        /* Animated Bubbles */
+        .bg-bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.8;
+            transition: var(--transition);
+            backdrop-filter: blur(2px);
+        }
+
+        .bubble:hover {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        .bubble.x1 { left: 10%; width: 40px; height: 40px; animation-duration: 8s; }
+        .bubble.x2 { left: 20%; width: 20px; height: 20px; animation-duration: 5s; animation-delay: 1s; }
+        .bubble.x3 { left: 35%; width: 50px; height: 50px; animation-duration: 7s; animation-delay: 2s; }
+        .bubble.x4 { left: 50%; width: 80px; height: 80px; animation-duration: 11s; animation-delay: 0s; }
+        .bubble.x5 { left: 55%; width: 35px; height: 35px; animation-duration: 6s; animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-80px) rotate(5deg); }
+        }
+
+        /* Auth Container */
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: translateY(30px);
+            opacity: 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Logo Section */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .logo-img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 6px 12px rgba(94, 53, 177, 0.5));
+            animation: float 4s ease-in-out infinite, pulse 3s ease-in-out infinite, glow 4s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 1s ease-out;
+            margin-top: 0.8rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            margin: 0.8rem 0 0.5rem;
+            color: var(--white);
+            animation: fadeIn 1s ease-out 0.3s forwards;
+            opacity: 0;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            animation: fadeIn 1s ease-out 0.4s forwards;
+            opacity: 0;
+            font-size: 1.05rem;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(1deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(94, 53, 177, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(94, 53, 177, 0.7)); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Form Styles */
+        .auth-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: calc(var(--i) * 0.1s);
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            color: var(--white);
+            font-size: 0.95rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .input-with-icon input {
+            width: 100%;
+            padding: 14px 18px 14px 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: var(--white);
+        }
+
+        .input-with-icon input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-with-icon input:focus {
+            border-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+            outline: none;
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.25);
+            animation: inputFocusGlow 1.5s infinite alternate;
+        }
+
+        @keyframes inputFocusGlow {
+            from { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2); }
+            to { box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.3); }
+        }
+
+        .input-with-icon input:focus + i {
+            color: var(--white);
+            transform: translateY(-50%) scale(1.1);
+            animation: iconPulse 1s infinite alternate;
+        }
+
+        @keyframes iconPulse {
+            from { transform: translateY(-50%) scale(1.1); }
+            to { transform: translateY(-50%) scale(1.3); }
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+
+        .toggle-password:hover {
+            color: var(--white);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Password Strength Meter */
+        .password-strength {
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strength-meter {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .strength-section {
+            height: 4px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        /* Terms Checkbox */
+        .terms {
+            display: flex;
+            align-items: center;
+            margin: 1.8rem 0;
+            position: relative;
+            padding-left: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .terms input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 20px;
+            width: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .terms:hover input ~ .checkmark {
+            border-color: var(--white);
+        }
+
+        .terms input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            animation: checkmarkBounce 0.5s;
+        }
+
+        @keyframes checkmarkBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .terms input:checked ~ .checkmark:after {
+            display: block;
+            animation: checkmarkIn 0.3s ease-out;
+        }
+
+        @keyframes checkmarkIn {
+            from { transform: scale(0) rotate(45deg); }
+            to { transform: scale(1) rotate(45deg); }
+        }
+
+        .terms a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+            color: var(--accent-color);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            animation: btnHoverPulse 1s infinite alternate;
+        }
+
+        @keyframes btnHoverPulse {
+            from { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); }
+            to { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); }
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn .btn-text {
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn.loading .btn-text {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .btn-loader {
+            position: absolute;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn.loading .btn-loader {
+            display: flex;
+        }
+
+        .loader-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--white);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Auth Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            animation: fadeIn 0.6s ease-out 0.8s forwards;
+            opacity: 0;
+        }
+
+        .auth-footer a {
+            color: var(--white);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+            color: var(--accent-color);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 1.8rem;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.6s ease-out;
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--white);
+        }
+
+        .alert-success {
+            border-left-color: var(--accent-color);
+        }
+
+        .alert-danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .close-btn {
+            margin-left: auto;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            color: var(--white);
+            opacity: 0.7;
+            transition: var(--transition);
+            padding: 0 0 0 12px;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+
+        /* Form Validation Errors */
+        .error-message {
+            color: var(--accent-color);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .input-error {
+            border-color: var(--accent-color) !important;
+            animation: inputErrorShake 0.5s;
+        }
+
+        @keyframes inputErrorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 1.5rem;
+            }
+            
+            .auth-card {
+                padding: 2rem 1.5rem;
+                border-radius: 12px;
+            }
+            
+            .logo-img {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .input-with-icon input {
+                padding: 12px 16px 12px 46px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Background Animation Elements -->
+        <div class="bg-bubbles">
+            <div class="bubble x1"></div>
+            <div class="bubble x2"></div>
+            <div class="bubble x3"></div>
+            <div class="bubble x4"></div>
+            <div class="bubble x5"></div>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='images/logo-search-grid-2x-removebg-preview.png') }}" 
+                         class="logo-img" 
+                         alt="EmotionAI Logo">
+                    <div class="logo-text">EmotionAI</div>
+                </div>
+                <h1>Create Account</h1>
+                <p>Join our community today</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                            <span class="close-btn">&times;</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="/register" class="auth-form" id="registerForm" novalidate>
+                <div class="form-group" style="--i: 0">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+                <div class="form-group" style="--i: 1">
+                    <label for="name">Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="error-message" id="name-error"></div>
+                </div>
+                <div class="form-group" style="--i: 2">
+                    <label for="email">Email</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="error-message" id="email-error"></div>
+                </div>
+                <div class="form-group" style="--i: 3">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter password (min {{ min_password_length }} chars)" required minlength="{{ min_password_length }}">
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-meter">
+                            <span class="strength-section"></span>
+                            <span class="strength-section"></span>
+                            <span class="strength-section"></span>
+                        </div>
+                        <span class="strength-text">Password strength</span>
+                    </div>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                <div class="form-group" style="--i: 4">
+                    <label for="confirm_password">Confirm Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                    </div>
+                    <div class="error-message" id="confirm-password-error"></div>
+                </div>
+                <div class="form-group terms" style="--i: 5">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                    <span class="checkmark"></span>
+                    <div class="error-message" id="terms-error"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="--i: 6" id="submitBtn">
+                    <span class="btn-text">Register Now</span>
+                    <span class="btn-loader">
+                        <div class="loader-dot"></div>
+                        <div class="loader-dot"></div>
+                        <div class="loader-dot"></div>
+                    </span>
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{{ url_for('login') }}" class="login-link">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility with enhanced animation
+            document.querySelectorAll('.toggle-password').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                        this.classList.add('animate__animated', 'animate__rubberBand');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                        this.classList.add('animate__animated', 'animate__headShake');
+                    }
+                    
+                    setTimeout(function() {
+                        button.classList.remove('animate__animated', 'animate__rubberBand', 'animate__headShake');
+                    }, 1000);
+                });
+            });
+
+            // Password strength indicator with enhanced animations
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    const strengthMeter = this.closest('.form-group').querySelector('.strength-meter');
+                    const strengthText = this.closest('.form-group').querySelector('.strength-text');
+                    const sections = strengthMeter.querySelectorAll('.strength-section');
+                    
+                    let strength = 0;
+                    
+                    if (password.length > 0) strength++;
+                    if (password.length >= 8) strength++;
+                    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+                    if (/\d/.test(password)) strength++;
+                    if (/[^A-Za-z0-9]/.test(password)) strength++;
+                    
+                    sections.forEach(function(section, index) {
+                        if (index < strength) {
+                            section.style.backgroundColor = getStrengthColor(strength);
+                            section.style.transform = 'scaleY(1.5)';
+                            setTimeout(function() {
+                                section.style.transform = 'scaleY(1)';
+                            }, 300);
+                        } else {
+                            section.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                        }
+                    });
+                    
+                    strengthText.textContent = getStrengthText(strength);
+                    strengthText.style.color = getStrengthColor(strength);
+                    strengthText.style.fontWeight = '600';
+                    strengthText.style.textShadow = '0 1px 2px rgba(0,0,0,0.3)';
+                });
+                
+                function getStrengthColor(strength) {
+                    if (strength <= 2) return '#f72585';
+                    if (strength <= 4) return '#f8961e';
+                    return '#4cc9f0';
+                }
+                
+                function getStrengthText(strength) {
+                    if (strength <= 2) return 'Weak';
+                    if (strength <= 4) return 'Medium';
+                    return 'Strong';
+                }
+            }
+
+            // Terms checkbox with enhanced animation
+            const termsContainer = document.querySelector('.terms');
+            if (termsContainer) {
+                const termsCheckbox = termsContainer.querySelector('input[type="checkbox"]');
+                const checkmark = termsContainer.querySelector('.checkmark');
+                
+                termsContainer.addEventListener('click', function(e) {
+                    if (!e.target.closest('a')) {
+                        termsCheckbox.checked = !termsCheckbox.checked;
+                        updateCheckboxVisual();
+                        termsCheckbox.dispatchEvent(new Event('change'));
+                    }
+                });
+                
+                termsCheckbox.addEventListener('change', updateCheckboxVisual);
+                
+                function updateCheckboxVisual() {
+                    if (termsCheckbox.checked) {
+                        checkmark.style.backgroundColor = 'var(--primary-color)';
+                        checkmark.style.borderColor = 'var(--primary-color)';
+                    } else {
+                        checkmark.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        checkmark.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    }
+                }
+            }
+
+            // Form validation with enhanced animations
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Reset error states
+                    document.querySelectorAll('.error-message').forEach(function(el) {
+                        el.style.display = 'none';
+                        el.textContent = '';
+                    });
+                    document.querySelectorAll('.input-error').forEach(function(el) {
+                        el.classList.remove('input-error');
+                    });
+                    
+                    // Validate form
+                    let isValid = true;
+                    const username = document.getElementById('username');
+                    const name = document.getElementById('name');
+                    const email = document.getElementById('email');
+                    const password = document.getElementById('password');
+                    const confirmPassword = document.getElementById('confirm_password');
+                    const terms = document.getElementById('terms');
+                    
+                    // Username validation
+                    if (!username.value.trim()) {
+                        showError(username, 'Username is required', 'username-error');
+                        isValid = false;
+                    } else if (username.value.trim().length < 3) {
+                        showError(username, 'Username must be at least 3 characters', 'username-error');
+                        isValid = false;
+                    }
+                    
+                    // Name validation
+                    if (!name.value.trim()) {
+                        showError(name, 'Full name is required', 'name-error');
+                        isValid = false;
+                    }
+                    
+                    // Email validation
+                    if (!email.value.trim()) {
+                        showError(email, 'Email is required', 'email-error');
+                        isValid = false;
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                        showError(email, 'Please enter a valid email address', 'email-error');
+                        isValid = false;
+                    }
+                    
+                    // Password validation
+                    if (!password.value) {
+                        showError(password, 'Password is required', 'password-error');
+                        isValid = false;
+                    } else if (password.value.length < {{ min_password_length }}) {
+                        showError(password, `Password must be at least {{ min_password_length }} characters`, 'password-error');
+                        isValid = false;
+                    }
+                    
+                    // Confirm password validation
+                    if (!confirmPassword.value) {
+                        showError(confirmPassword, 'Please confirm your password', 'confirm-password-error');
+                        isValid = false;
+                    } else if (password.value !== confirmPassword.value) {
+                        showError(confirmPassword, 'Passwords do not match', 'confirm-password-error');
+                        isValid = false;
+                    }
+                    
+                    // Terms validation
+                    if (!terms.checked) {
+                        const termsError = document.getElementById('terms-error');
+                        termsError.textContent = 'You must accept the terms and conditions';
+                        termsError.style.display = 'block';
+                        terms.closest('.terms').classList.add('input-error');
+                        isValid = false;
+                    }
+                    
+                    if (isValid) {
+                        // Show loading state
+                        const submitBtn = document.getElementById('submitBtn');
+                        submitBtn.classList.add('loading');
+                        
+                        // Add success animation before submitting
+                        registerForm.classList.add('animate__animated', 'animate__pulse');
+                        
+                        // Submit the form after animation
+                        setTimeout(() => {
+                            this.submit();
+                        }, 1000);
+                    }
+                });
+                
+                function showError(inputElement, message, errorElementId) {
+                    inputElement.classList.add('input-error');
+                    const errorElement = document.getElementById(errorElementId);
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                    
+                    // Add shake animation to error element
+                    errorElement.classList.add('animate__animated', 'animate__shakeX');
+                    setTimeout(() => {
+                        errorElement.classList.remove('animate__animated', 'animate__shakeX');
+                    }, 1000);
+                }
+            }
+
+            // Close alert buttons with animation
+            document.querySelectorAll('.close-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    this.parentElement.style.animation = 'fadeOut 0.4s ease-out forwards';
+                    setTimeout(function() {
+                        this.parentElement.remove();
+                    }.bind(this), 400);
+                });
+            });
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.btn').forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(function() {
+                        ripple.remove();
+                    }, 1000);
+                });
+            });
+            
+            // Input focus animations
+            document.querySelectorAll('input').forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('animate__animated', 'animate__pulse');
+                    setTimeout(() => {
+                        this.parentElement.classList.remove('animate__animated', 'animate__pulse');
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

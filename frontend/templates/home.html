@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Emotion Recognition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo">EmotionAI</div>
+        <nav>
+            <a href="{{ url_for('home') }}" 
+               {% if request.endpoint == 'home' %}class="active"{% endif %}>
+               Home
+            </a>
+            <a href="{{ url_for('about') }}" 
+               {% if request.endpoint == 'about' %}class="active"{% endif %}>
+               About
+            </a>
+            {% if logged_in %}
+            <a href="{{ url_for('recognition') }}" 
+               {% if request.endpoint == 'recognition' %}class="active"{% endif %}>
+               Recognition
+            </a>
+            <a href="{{ url_for('logout') }}" 
+               {% if request.endpoint == 'logout' %}class="active"{% endif %}>
+               Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" 
+               {% if request.endpoint == 'login' %}class="active"{% endif %}>
+               Login
+            </a>
+            <a href="{{ url_for('register') }}" 
+               {% if request.endpoint == 'register' %}class="active"{% endif %}>
+               Register
+            </a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Detect Emotions with AI</h1>
+            <p>Upload an image or use your webcam to analyze facial expressions in real-time.</p>
+            <a href="recognition.html" class="cta-button">Get Started</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature">
+            <h2>AI-Powered Analysis</h2>
+            <p>Our cutting-edge AI model detects emotions instantly.</p>
+        </div>
+        <div class="feature">
+            <h2>Real-Time Recognition</h2>
+            <p>Use your webcam for live emotion detection.</p>
+        </div>
+        <div class="feature">
+            <h2>Secure & Private</h2>
+            <p>Your images are processed securely with no data retention.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 EmotionAI. All rights reserved.</p>
+    </footer>
+</body>
+</html>
