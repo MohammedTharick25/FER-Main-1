@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Emotion Detection</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Registered Users</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/recognition.html">Emotion Detection</a>
+            <a href="/about">About</a>
+            <a href="/logout">Logout ({{ current_user }})</a>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>User List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for username, user_data in users.items() %}
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>{{ user_data.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
