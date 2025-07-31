@@ -1,2 +1,13 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+__pycache__/
+*.pyc
+.env
+*.h5
+*.pkl
+.DS_Store
+*.log
+*.sqlite3
+*.idea/
+*.vscode/
+
