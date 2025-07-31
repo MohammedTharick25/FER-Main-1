@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Users - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Emotion Detection App - Admin Panel</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/recognition.html">Emotion Detection</a>
+            <a href="/about">About</a>
+            <a href="/logout">Logout ({{ session.username }})</a>
+        </nav>
+    </header>
+    
+    <main class="admin-container">
+        <h2>Registered Users</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="user-count">
+            Total Users: {{ users|length }}
+        </div>
+        
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Registered On</th>
+                    <th>Last Login</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for username, user_data in users %}
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>{{ user_data.name }}</td>
+                    <td>{{ user_data.email }}</td>
+                    <td>{{ user_data.registered_on }}</td>
+                    <td>{{ user_data.last_login if user_data.last_login else 'Never' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
