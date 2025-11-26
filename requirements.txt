@@ -6,3 +6,4 @@ Pillow==9.5.0
 numpy==1.26.4
 gunicorn==21.2.0
 Werkzeug==2.3.7
+gradio==3.49.0
