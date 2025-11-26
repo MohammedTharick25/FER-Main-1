@@ -12,6 +12,9 @@ from PIL import Image
 import os
 import re
 
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
